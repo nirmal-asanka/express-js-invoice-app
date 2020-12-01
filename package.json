@@ -7,7 +7,8 @@
   "scripts": {
     "start": "node ./src/server.js",
     "dev": "nodemon --experimental-specifier-resolution=node ./src/server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint:fix": "npm run lint:js -- --fix"
   },
   "repository": {
     "type": "git",
