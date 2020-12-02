@@ -5,7 +5,95 @@
     </div>
   </section>
   <section class="section">
-    <div class="container"><%-pageData%></div>
-    <div class="container"></div>
+    <div class="container">
+      <form id="form-invoice-line">
+        <div class="columns">
+          <div class="column">
+            <div class="field">
+              <label class="label">Select an Item</label>
+              <div class="control">
+                <div class="select is-rounded">
+                  <select>
+                    <option value="null">Select dropdown</option>
+                    <% pageData.map((item) => { %>
+                    <option value="<%=item.itemId%>"><%=item.name%></option>
+                    <% }) %>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="column">
+            <div class="field">
+              <label class="label" for="quantity">Quantity</label>
+              <div class="control">
+                <input class="input is-rounded" name="quantity" type="text" value="1" />
+              </div>
+            </div>
+          </div>
+          <div class="column">
+            <div class="field">
+              <label class="label" for="description">Description</label>
+              <div class="control">
+                <input
+                  class="input is-rounded"
+                  name="description"
+                  type="text"
+                  placeholder="Description"
+                />
+              </div>
+            </div>
+          </div>
+          <div class="column">
+            <div class="field">
+              <div class="control" style="top: 32px">
+                <button class="button is-primary is-rounded" id="btn-add-invoice-line">
+                  Add invoice line
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </section>
+  <section class="section">
+    <div class="container">
+      <table class="table" id="table-invoice-line">
+        <thead>
+          <tr>
+            <th>Item Id</th>
+            <th>Item Name</th>
+            <th>Unit</th>
+            <th>Unit Price</th>
+            <th>Quantity</th>
+            <th>Total Price</th>
+            <th>Description</th>
+            <th>Remove</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1</td>
+            <td>Fresh Produce Apple</td>
+            <td>1kg</td>
+            <td>$7.5</td>
+            <td>2</td>
+            <td>$15</td>
+            <td>Some Descriptions</td>
+            <td>
+              <a href="#"><img class="image" src="images/remove.png" /></a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+  <section class="section">
+    <div class="container">
+      <button class="button is-primary is-rounded" id="btn-generate-invoice">
+        Generate invoice
+      </button>
+    </div>
   </section>
 </div>

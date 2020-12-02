@@ -1,9 +1,9 @@
 [
-  { "name": "Fresh Produce Apple", "price": 7.5, "unit": "1kg" },
-  { "name": "Fresh Produce Mandarins", "price": 2.0, "unit": "1kg" },
-  { "name": "Fresh Produce Banana", "price": 5.0, "unit": "1kg" },
-  { "name": "Fresh Produce Pineapple", "price": 8.99, "unit": "1kg" },
-  { "name": "Fresh Produce Kiwifruit", "price": 9.7, "unit": "1kg" },
-  { "name": "Fresh Produce Strawberries", "price": 1.9, "unit": "1kg" },
-  { "name": "Fresh Produce Peach", "price": 5.99, "unit": "1kg" }
+  { "itemId": 1, "name": "Fresh Produce Apple", "price": 7.5, "unit": "1kg" },
+  { "itemId": 2, "name": "Fresh Produce Mandarins", "price": 2.0, "unit": "1kg" },
+  { "itemId": 3, "name": "Fresh Produce Banana", "price": 5.0, "unit": "1kg" },
+  { "itemId": 4, "name": "Fresh Produce Pineapple", "price": 8.99, "unit": "1kg" },
+  { "itemId": 5, "name": "Fresh Produce Kiwifruit", "price": 9.7, "unit": "1kg" },
+  { "itemId": 6, "name": "Fresh Produce Strawberries", "price": 1.9, "unit": "1kg" },
+  { "itemId": 7, "name": "Fresh Produce Peach", "price": 5.99, "unit": "1kg" }
 ]

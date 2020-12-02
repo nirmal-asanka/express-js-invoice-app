@@ -27,11 +27,10 @@ const routes = (routeParameters) => {
     try {
       const { invoiceService } = routeParameters;
       const inventoryItems = await invoiceService.getList();
-      const pageData = inventoryItems;
       return response.render('layout', {
         pageTitle: 'All invoices',
         pageName: 'invoice-list',
-        pageData,
+        pageData: inventoryItems,
       });
     } catch (error) {
       return next(error);
@@ -52,11 +51,10 @@ const routes = (routeParameters) => {
     try {
       const { itemService } = routeParameters;
       const inventoryItems = await itemService.getList();
-      const pageData = JSON.stringify(inventoryItems);
       return response.render('layout', {
         pageTitle: 'Add invoice',
         pageName: 'invoice-add',
-        pageData,
+        pageData: inventoryItems,
       });
     } catch (error) {
       return next(error);
