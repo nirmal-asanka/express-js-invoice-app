@@ -1,6 +1,6 @@
 # express-js-invoice-app
 
-small invoice app using express js
+A simple invoicing MPA (Multi Page Application) using express js, boilerplate for eslint, unit tests, mongodb use with express js.
 
 # prer-equisits
 
