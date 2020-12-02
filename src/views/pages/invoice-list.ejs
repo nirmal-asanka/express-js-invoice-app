@@ -1,12 +1,33 @@
 <div class="container">
-    <section class="section">
-      <div class="container">
-        <h1 class="title"><%=pageTitle%></h1>
-      </div>
-    </section>
-    <section class="section">
-      <div class="container">
-        <%=pageData%>
-      </div>
+  <section class="section">
+    <div class="container">
+      <h1 class="title"><%=pageTitle%></h1>
+    </div>
+  </section>
+  <section class="section">
+    <div class="container">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Invoice Id</th>
+            <th>Created Date</th>
+            <th>Grand Total</th>
+            <th>View Invoice</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% pageData.map((invoice) => { %>
+          <tr>
+            <td><%=invoice.invoiceId%></td>
+            <td><%=invoice.createdDate%></td>
+            <td>$<%=invoice.grandTotal%></td>
+            <td>
+              <a href="/invoices/<%=invoice.invoiceId%>"><img src="images/globe2.png" /></a>
+            </td>
+          </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
   </section>
 </div>

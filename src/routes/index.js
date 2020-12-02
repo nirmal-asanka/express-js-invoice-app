@@ -4,54 +4,94 @@
  * But I would preffer to see all route definistions in a single file. So easy!!!
  */
 import express from 'express';
+import createError from 'http-errors';
 
 const routes = (routeParameters) => {
   const router = express.Router();
 
   // Dashboard
-  router.get('/', (request, response) => {
-    response.render('layout', { pageTitle: 'Dashboard', pageName: 'index' });
+  router.get('/', (request, response, next) => {
+    try {
+      return response.render('layout', { pageTitle: 'Dashboard', pageName: 'index' });
+    } catch (error) {
+      return next(error);
+    }
   });
 
   // Retrieve list of invoices
-  router.get('/invoices', async(request, response) => {
-
+  router.get('/invoices', async (request, response, next) => {
     // // if (!request.session.visitcount) {
     // //   request.session.visitcount = 0;
     // // }
     // // request.session.visitcount += 1;
-    const { invoiceService } = routeParameters;
-    const inventoryItems = await invoiceService.getList();
-    const pageData = JSON.stringify(inventoryItems);
-    response.render('layout', { pageTitle: 'All invoices', pageName: 'invoice-list', pageData });
+    try {
+      const { invoiceService } = routeParameters;
+      const inventoryItems = await invoiceService.getList();
+      const pageData = inventoryItems;
+      return response.render('layout', {
+        pageTitle: 'All invoices',
+        pageName: 'invoice-list',
+        pageData,
+      });
+    } catch (error) {
+      return next(error);
+    }
   });
 
   // Retrieve a single invcoie
-  router.get('/invoices:id', (request, response) => {
-    response.send('View single invcoie');
+  router.get('/invoices:id', (request, response, next) => {
+    try {
+      return response.send('View single invcoie');
+    } catch (error) {
+      return next(error);
+    }
   });
 
   // Load the new invoice form
-  router.get('/invoice', async (request, response) => {
-    const { itemService } = routeParameters;
-    const inventoryItems = await itemService.getList();
-    const pageData = JSON.stringify(inventoryItems);
-    response.render('layout', { pageTitle: 'Add invoice', pageName: 'invoice-add', pageData });
+  router.get('/invoice', async (request, response, next) => {
+    try {
+      const { itemService } = routeParameters;
+      const inventoryItems = await itemService.getList();
+      const pageData = JSON.stringify(inventoryItems);
+      return response.render('layout', {
+        pageTitle: 'Add invoice',
+        pageName: 'invoice-add',
+        pageData,
+      });
+    } catch (error) {
+      return next(error);
+    }
   });
 
   // Submit the new invoice form
-  router.post('/invoice', (request, response) => {
-    response.send('Submitted new invoice');
+  router.post('/invoice', (request, response, next) => {
+    try {
+      return response.send('Submitted new invoice');
+    } catch (error) {
+      return next(error);
+    }
   });
 
   // Load the merge invoice form
-  router.get('/merge-invoices', (request, response) => {
-    response.render('layout', { pageTitle: 'Add invoice', pageName: 'invoice-merge' });
+  router.get('/merge-invoices', (request, response, next) => {
+    try {
+      return response.render('layout', { pageTitle: 'Add invoice', pageName: 'invoice-merge' });
+    } catch (error) {
+      return next(error);
+    }
   });
 
   // Submit the merge invoice form
-  router.post('/merge-invcoies', (request, response) => {
-    response.send('Submitted existing invoices to merge');
+  router.post('/merge-invcoies', (request, response, next) => {
+    try {
+      return response.send('Submitted existing invoices to merge');
+    } catch (error) {
+      return next(error);
+    }
+  });
+
+  router.all('*', (request, response, next) => {
+    return next(createError(404, 'File not found'));
   });
 
   return router;

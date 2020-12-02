@@ -7,6 +7,7 @@ import path from 'path';
 import routes from './routes';
 import ItemService from './services/ItemService';
 import InvoiceService from './services/InvoiceService';
+import GetErrorMessage from './services/ErrorService';
 
 const app = express();
 const port = 3000;
@@ -31,6 +32,19 @@ app.use(
 //   name: 'session',
 //   keys: ['random001', 'random002'],
 // });
+
+app.use((error, request, response, next) => {
+  response.locals.message = error.message;
+  const status = error.status || 500;
+  response.locals.status = status;
+  response.status(status);
+  const errorMessage = GetErrorMessage(status);
+  return response.render('layout', {
+    pageTitle: status,
+    pageName: 'error',
+    data: { errorMessage },
+  });
+});
 /**
  * http://localhost:3000
  */
