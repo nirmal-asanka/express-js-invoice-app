@@ -91,9 +91,19 @@
   </section>
   <section class="section">
     <div class="container">
-      <button class="button is-primary is-rounded" id="btn-generate-invoice">
-        Generate invoice
-      </button>
+      <form name="invoice-form" action="/invoice" method="POST">
+        <input type="hidden" name="invoice-line-json" value="" />
+        <% if (pageErrors) { pageErrors.map((error) => { %>
+        <p class="has-text-danger-dark mt-2 is-size-7 has-text-left is-italic"><%= error.msg %></p>
+        <% }) } %>
+        <button class="button is-primary is-rounded" type="submit" id="btn-generate-invoice">
+          Generate invoice
+        </button>
+      </form>
     </div>
   </section>
 </div>
+
+<!-- <%= JSON.stringify([{"itemId": 1,
+        "name": "Fresh Produce Apple", "totalPrice": 15, "unit": "1kg", "unitPrice": 7.5,
+        "description": 'someDescription'}]) %> -->
