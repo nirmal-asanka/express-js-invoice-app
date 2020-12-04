@@ -10,10 +10,10 @@
         <div class="columns">
           <div class="column">
             <div class="field">
-              <label class="label">Select an Item</label>
+              <label class="label" for="item">Select an Item</label>
               <div class="control">
                 <div class="select is-rounded">
-                  <select>
+                  <select name="item">
                     <option value="null">Select dropdown</option>
                     <% pageData.map((item) => { %>
                     <option value="<%=item.itemId%>"><%=item.name%></option>
@@ -92,7 +92,7 @@
   <section class="section">
     <div class="container">
       <form name="invoice-form" action="/invoice" method="POST">
-        <input type="hidden" name="invoice-line-json" value="" />
+        <input type="hidden" name="invoiceLinesJson" value="" />
         <% if (pageErrors) { pageErrors.map((error) => { %>
         <p class="has-text-danger-dark mt-2 is-size-7 has-text-left is-italic"><%= error.msg %></p>
         <% }) } %>

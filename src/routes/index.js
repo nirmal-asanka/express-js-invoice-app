@@ -7,6 +7,32 @@ import express from 'express';
 import createError from 'http-errors';
 import { check, validationResult } from 'express-validator';
 
+const invoiceGeneratorValidations = [
+  check('invoiceLinesJson')
+        .trim()
+        .isLength({ min: 3 })
+        .escape()
+        .withMessage('At least one invoice line is required'),
+];
+
+// const invoiceLineAddValidations = [
+//   check('item')
+//         .trim()
+//         .isLength({ min: 3 })
+//         .escape()
+//         .withMessage('Please select an inventory item'),
+//   check('quantity')
+//         .trim()
+//         .isLength({ min: 1 })
+//         .escape()
+//         .withMessage('Please add a quantity'),
+//   check('description')
+//         .trim()
+//         .isLength({ min: 1 })
+//         .escape()
+//         .withMessage('Please write a description'),
+// ];
+
 const routes = (routeParameters) => {
   const router = express.Router();
 
@@ -24,6 +50,7 @@ const routes = (routeParameters) => {
     try {
       const { invoiceService } = routeParameters;
       const inventoryItems = await invoiceService.getList();
+      console.log('inventoryItems --->>', inventoryItems)
       return response.render('layout', {
         pageTitle: 'All invoices',
         pageName: 'invoice-list',
@@ -63,16 +90,43 @@ const routes = (routeParameters) => {
     }
   });
 
+  // // Submit invoice lines
+  // router.post(
+  //   '/invoice-line',
+  //   [invoiceLineAddValidations],
+  //   async (request, response, next) => {
+  //     try {
+  //       const errors = validationResult(request);
+  //       if (!errors.isEmpty()) {
+  //         return response.json({errors: errors.array()})
+  //         // return json error
+  //       }
+  //       const { invoiceService } = routeParameters;
+  //       const newInvoiceLinesJson = await invoiceService.addInvoiceLine(request.body);
+  //       return response.json({pageData: [
+  //         newInvoiceLinesJson
+  //       ]});
+  //     } catch (error) {
+  //       return next(error);
+  //     }
+  // });
+
+  // router.delete(
+  //   '/invoice-line',
+  //   (request, response, next) => {
+  //     try {
+  //       // delete the line and
+  //       // re arrange the nvoice-lines-json (call to invoice services -->)
+  //       // return new invoice-lines-json
+  //     } catch (error) {
+  //       return next(error);
+  //     }
+  // });
+
   // Submit the new invoice form
   router.post(
     '/invoice',
-    [
-      check('invoice-line-json')
-        .trim()
-        .isLength({ min: 3 })
-        .escape()
-        .withMessage('At least one invoice line is required'),
-    ],
+    [invoiceGeneratorValidations],
     (request, response, next) => {
       try {
         const errors = validationResult(request);
@@ -82,7 +136,7 @@ const routes = (routeParameters) => {
           };
           return response.redirect('/invoice');
         }
-        return response.send('Submitted new invoice');
+        return response.redirect('/invoices');
       } catch (error) {
         return next(error);
       }

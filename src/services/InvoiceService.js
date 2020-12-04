@@ -12,6 +12,28 @@ class InvoiceService {
     this.datafile = datafile;
   }
 
+  // async addInvoiceLine(responseBody) {
+  //   const {
+  //     item,
+  //     quantity,
+  //     description,
+  //     invoiceLinesJson
+  //   } = responseBody;
+
+  //   const data = await this.getData();
+
+  //   const newLineData = {
+  //     itemId: '',
+  //     itemName: '',
+  //     unit: '',
+  //     unitPrice: '',
+  //     quantity,
+  //     totalPrice: unitPrice * quantity,
+  //     description
+  //   }
+  //   return JSON.parse([]);
+  // }
+
   async getList() {
     const data = await this.getData();
     return data.map((invoiceItem) => {
