@@ -1,108 +1,42 @@
 import fs from 'fs';
 import util from 'util';
+import { find, propEq } from 'ramda';
 
 const readFile = util.promisify(fs.readFile);
 
 class ItemService {
   /**
    * Constructor
-   * @param {*} datafile Path to a JSOn file that contains the speakers data
+   * @param {*} datafile Path to a JSON file that contains the inventory item data
    */
   constructor(datafile) {
     this.datafile = datafile;
   }
 
-  //   /**
-  //    * Returns a list of speakers name and short name
-  //    */
-  //   async getNames() {
-  //     const data = await this.getData();
-
-  //     // We are using map() to transform the array we get into another one
-  //     return data.map((speaker) => {
-  //       return { name: speaker.name, shortname: speaker.shortname };
-  //     });
-  //   }
-
-  //   /**
-  //    * Get all artwork
-  //    */
-  //   async getAllArtwork() {
-  //     const data = await this.getData();
-
-  //     // Array.reduce() is used to traverse all speakers and
-  //     // create an array that contains all artwork
-  //     const artwork = data.reduce((acc, elm) => {
-  //       if (elm.artwork) {
-  //         // eslint-disable-next-line no-param-reassign
-  //         acc = [...acc, ...elm.artwork];
-  //       }
-  //       return acc;
-  //     }, []);
-  //     return artwork;
-  //   }
-
-  //   /**
-  //    * Get all artwork of a given speaker
-  //    * @param {*} shortname The speakers short name
-  //    */
-  //   async getArtworkForSpeaker(shortname) {
-  //     const data = await this.getData();
-  //     const speaker = data.find((elm) => {
-  //       return elm.shortname === shortname;
-  //     });
-  //     if (!speaker || !speaker.artwork) return null;
-  //     return speaker.artwork;
-  //   }
-
-  //   /**
-  //    * Get speaker information provided a shortname
-  //    * @param {*} shortname
-  //    */
-  //   async getSpeaker(shortname) {
-  //     const data = await this.getData();
-  //     const speaker = data.find((elm) => {
-  //       return elm.shortname === shortname;
-  //     });
-  //     if (!speaker) return null;
-  //     return {
-  //       title: speaker.title,
-  //       name: speaker.name,
-  //       shortname: speaker.shortname,
-  //       description: speaker.description,
-  //     };
-  //   }
-
-  //   /**
-  //    * Returns a list of speakers with only the basic information
-  //    */
-  //   async getListShort() {
-  //     const data = await this.getData();
-  //     return data.map((speaker) => {
-  //       return {
-  //         name: speaker.name,
-  //         shortname: speaker.shortname,
-  //         title: speaker.title,
-  //       };
-  //     });
-  //   }
+  async getSingleItem(itemId) {
+    const data = await this.getData();
+    const item = find(propEq('itemId', itemId), data);
+    if (!item) return null;
+    return item;
+  }
 
   /**
-   * Get a list of speakers
+   * Get a list of inventory items
    */
   async getList() {
     const data = await this.getData();
     return data.map((inventoryItem) => {
       return {
+        itemId: inventoryItem.itemId,
         name: inventoryItem.name,
-        price: inventoryItem.price,
+        unitPrice: inventoryItem.unitPrice,
         unit: inventoryItem.unit,
       };
     });
   }
 
   /**
-   * Fetches speakers data from the JSON file provided to the constructor
+   * Fetches inventory item data from the JSON file provided to the constructor
    */
   async getData() {
     const data = await readFile(this.datafile, 'utf8');

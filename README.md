@@ -39,11 +39,13 @@ npm run test # run all unit tests
 # Structure
 
 ```
+logs/
 src/
+    management/
     server.js
     routes/
     services/
-    views
+    views/
         layout/
         pages/
 resources/
@@ -66,3 +68,6 @@ resources/
 # Non-functional
 
 1. Form validation
+2. Logging
+3. Linting (AirBnB standards)
+4. Unit Tests

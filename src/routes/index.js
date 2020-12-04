@@ -1,6 +1,6 @@
 /**
  * This file has all the routes defined in a single module export.
- * Potentially would break into multipe files such as invoices, merge-invoices as so forth
+ * Potentially could break into multipe files such as invoices, merge-invoices as so forth
  * But I would preffer to see all route definistions in a single file. So easy!!!
  */
 import express from 'express';
@@ -8,30 +8,27 @@ import createError from 'http-errors';
 import { check, validationResult } from 'express-validator';
 
 const invoiceGeneratorValidations = [
-  check('invoiceLinesJson')
-        .trim()
-        .isLength({ min: 3 })
-        .escape()
-        .withMessage('At least one invoice line is required'),
+  check('finalInvoiceLinesJson')
+    .trim()
+    .isLength({ min: 3 })
+    .escape()
+    .withMessage('At least one invoice line is required'),
 ];
 
-// const invoiceLineAddValidations = [
-//   check('item')
-//         .trim()
-//         .isLength({ min: 3 })
-//         .escape()
-//         .withMessage('Please select an inventory item'),
-//   check('quantity')
-//         .trim()
-//         .isLength({ min: 1 })
-//         .escape()
-//         .withMessage('Please add a quantity'),
-//   check('description')
-//         .trim()
-//         .isLength({ min: 1 })
-//         .escape()
-//         .withMessage('Please write a description'),
-// ];
+const invoiceLineAddValidations = [
+  check('item').trim().isLength({ min: 1 }).escape().withMessage('Please select an inventory item'),
+  check('quantity')
+    .trim()
+    .isNumeric()
+    .isLength({ min: 1 })
+    .escape()
+    .withMessage('Please add a quantity'),
+  check('description')
+    .trim()
+    .isLength({ min: 1 })
+    .escape()
+    .withMessage('Please write a description'),
+];
 
 const routes = (routeParameters) => {
   const router = express.Router();
@@ -49,12 +46,11 @@ const routes = (routeParameters) => {
   router.get('/invoices', async (request, response, next) => {
     try {
       const { invoiceService } = routeParameters;
-      const inventoryItems = await invoiceService.getList();
-      console.log('inventoryItems --->>', inventoryItems)
+      const invoiceItems = await invoiceService.getList();
       return response.render('layout', {
         pageTitle: 'All invoices',
         pageName: 'invoice-list',
-        pageData: inventoryItems,
+        pageData: invoiceItems,
       });
     } catch (error) {
       return next(error);
@@ -75,14 +71,27 @@ const routes = (routeParameters) => {
     try {
       const { itemService } = routeParameters;
       const inventoryItems = await itemService.getList();
-      const errors = request?.session?.invoice?.errors;
+
+      // Errors
+      let errors = '';
+      errors = {
+        invoiceLines: request?.session?.errors?.invoiceLines?.errors,
+        invoice: request?.session?.errors?.invoice?.errors,
+      };
       if (errors) {
-        request.session.invoice = {};
+        request.session.errors = {};
       }
+
+      // Page data
+      const pageData = {
+        inventoryItems,
+        invoiceLines: request?.session?.updatedInvoiceLine,
+      };
+
       return response.render('layout', {
         pageTitle: 'Add invoice',
         pageName: 'invoice-add',
-        pageData: inventoryItems,
+        pageData,
         pageErrors: errors,
       });
     } catch (error) {
@@ -90,58 +99,66 @@ const routes = (routeParameters) => {
     }
   });
 
-  // // Submit invoice lines
-  // router.post(
-  //   '/invoice-line',
-  //   [invoiceLineAddValidations],
-  //   async (request, response, next) => {
-  //     try {
-  //       const errors = validationResult(request);
-  //       if (!errors.isEmpty()) {
-  //         return response.json({errors: errors.array()})
-  //         // return json error
-  //       }
-  //       const { invoiceService } = routeParameters;
-  //       const newInvoiceLinesJson = await invoiceService.addInvoiceLine(request.body);
-  //       return response.json({pageData: [
-  //         newInvoiceLinesJson
-  //       ]});
-  //     } catch (error) {
-  //       return next(error);
-  //     }
-  // });
+  // Submit invoice lines
+  router.post('/invoice-line', [invoiceLineAddValidations], async (request, response, next) => {
+    try {
+      const errors = validationResult(request);
+      if (!errors.isEmpty()) {
+        request.session.errors.invoiceLines = {
+          errors: errors.array(),
+        };
+      } else {
+        const { invoiceLineService } = routeParameters;
+        const updatedInvoiceLine = await invoiceLineService.addInvoiceLine(request.body);
+        if (updatedInvoiceLine) {
+          request.session.updatedInvoiceLine = updatedInvoiceLine;
+        }
+      }
+      return response.redirect('/invoice');
+    } catch (error) {
+      return next(error);
+    }
+  });
 
-  // router.delete(
-  //   '/invoice-line',
-  //   (request, response, next) => {
-  //     try {
-  //       // delete the line and
-  //       // re arrange the nvoice-lines-json (call to invoice services -->)
-  //       // return new invoice-lines-json
-  //     } catch (error) {
-  //       return next(error);
-  //     }
-  // });
+  // Remove a line from invoice
+  router.get('/invoice-line-delete/:id', async (request, response, next) => {
+    try {
+      if (request.params.id) {
+        const itemId = request.params.id;
+        const { invoiceLineService } = routeParameters;
+        const existingInvoiceLines = request?.session?.updatedInvoiceLine;
+        const updatedInvoiceLine = await invoiceLineService.removeInvoiceLine(
+          itemId,
+          existingInvoiceLines
+        );
+
+        if (updatedInvoiceLine) {
+          request.session.updatedInvoiceLine = updatedInvoiceLine;
+        }
+      }
+      return response.redirect('/invoice');
+    } catch (error) {
+      return next(error);
+    }
+  });
 
   // Submit the new invoice form
-  router.post(
-    '/invoice',
-    [invoiceGeneratorValidations],
-    (request, response, next) => {
-      try {
-        const errors = validationResult(request);
-        if (!errors.isEmpty()) {
-          request.session.invoice = {
-            errors: errors.array(),
-          };
-          return response.redirect('/invoice');
-        }
-        return response.redirect('/invoices');
-      } catch (error) {
-        return next(error);
+  router.post('/invoice', [invoiceGeneratorValidations], (request, response, next) => {
+    try {
+      const errors = validationResult(request);
+      if (!errors.isEmpty()) {
+        request.session.errors.invoice = {
+          errors: errors.array(),
+        };
+        return response.redirect('/invoice');
       }
+      // create a new invoice and clear the invoiceLines
+      request.session.updatedInvoiceLine = '';
+      return response.redirect('/invoices');
+    } catch (error) {
+      return next(error);
     }
-  );
+  });
 
   // Load the merge invoice form
   router.get('/merge-invoices', (request, response, next) => {

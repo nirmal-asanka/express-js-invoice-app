@@ -9,11 +9,13 @@ import routes from './routes';
 import ItemService from './services/ItemService';
 import InvoiceService from './services/InvoiceService';
 import GetErrorMessage from './services/ErrorService';
+import InvoiceLineService from './services/InvoiceLineService';
 
 const app = express();
 const port = 3000;
 const itemService = new ItemService('./resources/data/items.json');
 const invoiceService = new InvoiceService('./resources/data/invoices.json');
+const invoiceLineService = new InvoiceLineService();
 
 /**
  * In order to work/ allow cookie sessions in Nginx or other web servers
@@ -40,6 +42,7 @@ app.use(
   routes({
     itemService,
     invoiceService,
+    invoiceLineService,
   })
 );
 /**
@@ -47,6 +50,7 @@ app.use(
  */
 app.use((error, request, response, next) => {
   response.locals.message = error.message;
+  console.log(error.message); // log this error
   const status = error.status || 500;
   response.locals.status = status;
   response.status(status);

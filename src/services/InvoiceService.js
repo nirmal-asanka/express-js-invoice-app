@@ -6,34 +6,15 @@ const readFile = util.promisify(fs.readFile);
 class InvoiceService {
   /**
    * Constructor
-   * @param {*} datafile Path to a JSOn file that contains the speakers data
+   * @param {*} datafile Path to a JSON file that contains the invoice data
    */
   constructor(datafile) {
     this.datafile = datafile;
   }
 
-  // async addInvoiceLine(responseBody) {
-  //   const {
-  //     item,
-  //     quantity,
-  //     description,
-  //     invoiceLinesJson
-  //   } = responseBody;
-
-  //   const data = await this.getData();
-
-  //   const newLineData = {
-  //     itemId: '',
-  //     itemName: '',
-  //     unit: '',
-  //     unitPrice: '',
-  //     quantity,
-  //     totalPrice: unitPrice * quantity,
-  //     description
-  //   }
-  //   return JSON.parse([]);
-  // }
-
+  /**
+   * Get a list of invoicess
+   */
   async getList() {
     const data = await this.getData();
     return data.map((invoiceItem) => {
@@ -46,7 +27,7 @@ class InvoiceService {
   }
 
   /**
-   * Fetches speakers data from the JSON file provided to the constructor
+   * Fetches invoice data from the JSON file provided to the constructor
    */
   async getData() {
     const data = await readFile(this.datafile, 'utf8');

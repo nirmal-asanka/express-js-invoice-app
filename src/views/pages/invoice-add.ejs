@@ -6,7 +6,10 @@
   </section>
   <section class="section">
     <div class="container">
-      <form id="form-invoice-line">
+      <% if (pageErrors.invoiceLines) { pageErrors.invoiceLines.map((error) => { %>
+      <p class="has-text-danger-dark mt-2 is-size-7 has-text-left is-italic"><%= error.msg %></p>
+      <% }) } %>
+      <form id="form-invoice-line" action="/invoice-line" method="POST">
         <div class="columns">
           <div class="column">
             <div class="field">
@@ -15,7 +18,7 @@
                 <div class="select is-rounded">
                   <select name="item">
                     <option value="null">Select dropdown</option>
-                    <% pageData.map((item) => { %>
+                    <% pageData.inventoryItems.map((item) => { %>
                     <option value="<%=item.itemId%>"><%=item.name%></option>
                     <% }) %>
                   </select>
@@ -47,7 +50,16 @@
           <div class="column">
             <div class="field">
               <div class="control" style="top: 32px">
-                <button class="button is-primary is-rounded" id="btn-add-invoice-line">
+                <input
+                  type="hidden"
+                  name="temporaryInvoiceLinesJson"
+                  value="<%=pageData.invoiceLines%>"
+                />
+                <button
+                  class="button is-primary is-rounded"
+                  id="btn-add-invoice-line"
+                  type="submit"
+                >
                   Add invoice line
                 </button>
               </div>
@@ -73,18 +85,29 @@
           </tr>
         </thead>
         <tbody>
+          <% if(pageData?.invoiceLines?.length > 0 && JSON.parse(pageData.invoiceLines).length > 0)
+          { %> <% JSON.parse(pageData.invoiceLines).map((line) => { %>
           <tr>
-            <td>1</td>
-            <td>Fresh Produce Apple</td>
-            <td>1kg</td>
-            <td>$7.5</td>
-            <td>2</td>
-            <td>$15</td>
-            <td>Some Descriptions</td>
+            <td><%=line.itemId%></td>
+            <td><%=line.itemName%></td>
+            <td><%=line.unit%></td>
+            <td><%=line.unitPrice%></td>
+            <td><%=line.quantity%></td>
+            <td>$<%=line.totalPrice%></td>
+            <td><%=line.description%></td>
             <td>
-              <a href="#"><img class="image" src="images/remove.png" /></a>
+              <a href="/invoice-line-delete/<%=line.lineId%>"
+                ><img class="image" src="images/remove.png"
+              /></a>
             </td>
           </tr>
+          <% }) } else { %>
+          <tr>
+            <td colspan="6">
+              <p class="is-italic is-size-7 has-text-centered">No invoice lines available</p>
+            </td>
+          </tr>
+          <% } %>
         </tbody>
       </table>
     </div>
@@ -92,10 +115,13 @@
   <section class="section">
     <div class="container">
       <form name="invoice-form" action="/invoice" method="POST">
-        <input type="hidden" name="invoiceLinesJson" value="" />
-        <% if (pageErrors) { pageErrors.map((error) => { %>
+        <input type="hidden" name="finalInvoiceLinesJson" value="<%=pageData.invoiceLines%>" />
+        <% if (pageErrors.invoice) { pageErrors.invoice.map((error) => { %>
         <p class="has-text-danger-dark mt-2 is-size-7 has-text-left is-italic"><%= error.msg %></p>
         <% }) } %>
+        <button class="button is-danger is-rounded" type="reset" id="btn-generate-invoice">
+          Reset invoice
+        </button>
         <button class="button is-primary is-rounded" type="submit" id="btn-generate-invoice">
           Generate invoice
         </button>
@@ -103,7 +129,3 @@
     </div>
   </section>
 </div>
-
-<!-- <%= JSON.stringify([{"itemId": 1,
-        "name": "Fresh Produce Apple", "totalPrice": 15, "unit": "1kg", "unitPrice": 7.5,
-        "description": 'someDescription'}]) %> -->
