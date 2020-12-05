@@ -15,11 +15,28 @@ class ItemService {
     this.LOG = LOG;
   }
 
+  /**
+   * @param {*} itemId
+   * @return - single item object
+   */
   async getSingleItem(itemId) {
-    const data = await this.getData();
-    const item = find(propEq('itemId', itemId), data);
-    if (!item) return null;
-    return item;
+    this.LOG.debug({
+      step: 'ItemService getList()',
+      message: 'Get inventory item list called',
+    });
+    try {
+      const data = await this.getData();
+      const item = find(propEq('itemId', itemId), data);
+      if (!item) return null;
+      return item;
+    } catch (error) {
+      this.LOG.debug({
+        step: 'ItemService getSingleItem()',
+        message: 'Error while retrieving a single item',
+        error: error.message,
+      });
+      return false;
+    }
   }
 
   /**
@@ -31,15 +48,24 @@ class ItemService {
       step: 'ItemService getList()',
       message: 'Get inventory item list called',
     });
-    const data = await this.getData();
-    return data.map((inventoryItem) => {
-      return {
-        itemId: inventoryItem.itemId,
-        name: inventoryItem.name,
-        unitPrice: inventoryItem.unitPrice,
-        unit: inventoryItem.unit,
-      };
-    });
+    try {
+      const data = await this.getData();
+      return data.map((inventoryItem) => {
+        return {
+          itemId: inventoryItem.itemId,
+          name: inventoryItem.name,
+          unitPrice: inventoryItem.unitPrice,
+          unit: inventoryItem.unit,
+        };
+      });
+    } catch (error) {
+      this.LOG.error({
+        step: 'ItemService getList()',
+        message: 'Error while formatting the item list',
+        error: error.message,
+      });
+      return false;
+    }
   }
 
   /**
@@ -47,12 +73,21 @@ class ItemService {
    * @return - json parsed inventory item list
    */
   async getData() {
-    const data = await readFile(this.datafile, 'utf8');
-    this.LOG.info({
-      step: 'ItemService getData()',
-      message: 'Inventory items returned successfully',
-    });
-    return JSON.parse(data);
+    try {
+      const data = await readFile(this.datafile, 'utf8');
+      this.LOG.info({
+        step: 'ItemService getData()',
+        message: 'Inventory items returned successfully',
+      });
+      return JSON.parse(data);
+    } catch (error) {
+      this.LOG.error({
+        step: 'ItemService getData()',
+        message: 'Error while reading the json file',
+        error: error.message,
+      });
+      return false;
+    }
   }
 }
 

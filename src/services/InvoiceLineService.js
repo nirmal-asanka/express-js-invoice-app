@@ -57,18 +57,27 @@ class InvoiceLineService extends ItemService {
    * @return - new invoice lines stringified object
    */
   async removeInvoiceLine(lineId, existingInvoiceLines) {
-    const existingItems = existingInvoiceLines ? JSON.parse(existingInvoiceLines) : [];
+    try {
+      const existingItems = existingInvoiceLines ? JSON.parse(existingInvoiceLines) : [];
 
-    const updatedLines = reject((item) => {
-      return item.lineId === lineId;
-    }, existingItems);
+      const updatedLines = reject((item) => {
+        return item.lineId === lineId;
+      }, existingItems);
 
-    this.LOG.info({
-      step: 'InvoiceLineService removeInvoiceLine()',
-      message: `Successfully removed an invoice line. lineId: ${lineId}`,
-    });
+      this.LOG.info({
+        step: 'InvoiceLineService removeInvoiceLine()',
+        message: `Successfully removed an invoice line. lineId: ${lineId}`,
+      });
 
-    return JSON.stringify(updatedLines);
+      return JSON.stringify(updatedLines);
+    } catch (error) {
+      this.LOG.error({
+        step: 'InvoiceLineService removeInvoiceLine()',
+        message: 'Error while removing the selected line',
+        error: error.message,
+      });
+      return false;
+    }
   }
 }
 

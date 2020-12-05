@@ -23,14 +23,23 @@ class InvoiceService {
       step: 'InvoiceService getList()',
       message: 'Get invoice list called',
     });
-    const data = await this.getData();
-    return data.map((invoiceItem) => {
-      return {
-        invoiceId: invoiceItem.invoiceId,
-        createdDate: moment(invoiceItem.createdDate).format('MMMM Do YYYY, h:mm:ss a'),
-        grandTotal: invoiceItem.grandTotal,
-      };
-    });
+    try {
+      const data = await this.getData();
+      return data.map((invoiceItem) => {
+        return {
+          invoiceId: invoiceItem.invoiceId,
+          createdDate: moment(invoiceItem.createdDate).format('MMMM Do YYYY, h:mm:ss a'),
+          grandTotal: invoiceItem.grandTotal,
+        };
+      });
+    } catch (error) {
+      this.LOG.error({
+        step: 'InvoiceService getList()',
+        message: 'Error while formatting the invoice list',
+        error: error.message,
+      });
+      return false;
+    }
   }
 
   /**
@@ -38,12 +47,21 @@ class InvoiceService {
    * @return - json parsed invoice list
    */
   async getData() {
-    const data = await readFile(this.datafile, 'utf8');
-    this.LOG.info({
-      step: 'InvoiceService getData()',
-      message: 'Invoices returned successfully',
-    });
-    return JSON.parse(data);
+    try {
+      const data = await readFile(this.datafile, 'utf8');
+      this.LOG.info({
+        step: 'InvoiceService getData()',
+        message: 'Invoices returned successfully',
+      });
+      return JSON.parse(data);
+    } catch (error) {
+      this.LOG.error({
+        step: 'InvoiceService getData()',
+        message: 'Error while reading the json file',
+        error: error.message,
+      });
+      return false;
+    }
   }
 }
 

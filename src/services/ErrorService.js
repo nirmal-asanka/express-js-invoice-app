@@ -1,3 +1,8 @@
+/**
+ *
+ * @param {*} errorCode important to have the standards error codes refer to - https://github.com/jshttp/http-errors#readme
+ * @return - custom message which could use for front-end
+ */
 const GetErrorMessage = (errorCode) => {
   let errorMessage = '';
   switch (errorCode) {
