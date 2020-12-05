@@ -4,41 +4,70 @@ import ItemService from './ItemService';
 
 class InvoiceLineService extends ItemService {
   /**
-   * addInvoiceLine - push the selected inventory item into existing list
-   * @param {*} datafile form data that contains selected inventory item details
+   * Constructor
+   * @param LOG Log class
    */
-  // eslint-disable-next-line class-methods-use-this
-  async addInvoiceLine(responseBody) {
-    const { item, quantity, description, temporaryInvoiceLinesJson } = responseBody;
-    const itemService = new ItemService('./resources/data/items.json');
-    const data = await itemService.getSingleItem(Number(item));
-    const existingItems = temporaryInvoiceLinesJson ? JSON.parse(temporaryInvoiceLinesJson) : [];
-    const newLineData = {
-      lineId: uuidv4(),
-      itemId: item,
-      itemName: data.name,
-      unit: data.unit,
-      unitPrice: data.unitPrice,
-      quantity,
-      totalPrice: data.unitPrice * quantity,
-      description,
-    };
+  constructor(LOG) {
+    super();
+    this.LOG = LOG;
+  }
 
-    existingItems.push(newLineData);
-    return JSON.stringify(existingItems);
+  /**
+   * addInvoiceLine - push the selected inventory item into existing list
+   * @param {*} responseBody form data that contains selected inventory item details
+   * @return - new invoice lines stringified object
+   */
+  async addInvoiceLine(responseBody) {
+    try {
+      const { item, quantity, description, temporaryInvoiceLinesJson } = responseBody;
+      const itemService = new ItemService('./resources/data/items.json', this.LOG);
+      const data = await itemService.getSingleItem(Number(item));
+      const existingItems = temporaryInvoiceLinesJson ? JSON.parse(temporaryInvoiceLinesJson) : [];
+      const newLineData = {
+        lineId: uuidv4(),
+        itemId: item,
+        itemName: data.name,
+        unit: data.unit,
+        unitPrice: data.unitPrice,
+        quantity,
+        totalPrice: data.unitPrice * quantity,
+        description,
+      };
+
+      existingItems.push(newLineData);
+      this.LOG.info({
+        step: 'InvoiceLineService addInvoiceLine()',
+        message: `New invoice line addded. itemName: ${data.name}`,
+      });
+      return JSON.stringify(existingItems);
+    } catch (error) {
+      this.LOG.error({
+        step: 'InvoiceLineService addInvoiceLine()',
+        message: 'Error while adding a new line',
+        error: error.message,
+      });
+      return false;
+    }
   }
 
   /**
    * removeInvoiceLine - remove the selected inventory item from the existing list
-   * @param {*} datafile form data that contains selected inventory item details
+   * @param {*} lineId form data that contains selected inventory item details
+   * @param {*} existingInvoiceLines currently selected items stored in the session
+   * @return - new invoice lines stringified object
    */
-  // eslint-disable-next-line class-methods-use-this
   async removeInvoiceLine(lineId, existingInvoiceLines) {
     const existingItems = existingInvoiceLines ? JSON.parse(existingInvoiceLines) : [];
 
     const updatedLines = reject((item) => {
       return item.lineId === lineId;
     }, existingItems);
+
+    this.LOG.info({
+      step: 'InvoiceLineService removeInvoiceLine()',
+      message: `Successfully removed an invoice line. lineId: ${lineId}`,
+    });
+
     return JSON.stringify(updatedLines);
   }
 }

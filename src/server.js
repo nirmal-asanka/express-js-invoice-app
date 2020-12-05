@@ -10,15 +10,17 @@ import ItemService from './services/ItemService';
 import InvoiceService from './services/InvoiceService';
 import GetErrorMessage from './services/ErrorService';
 import InvoiceLineService from './services/InvoiceLineService';
+import Log from './management/LogManagement';
 
 const app = express();
 const port = 3000;
-const itemService = new ItemService('./resources/data/items.json');
-const invoiceService = new InvoiceService('./resources/data/invoices.json');
-const invoiceLineService = new InvoiceLineService();
+const LOG = new Log();
+const itemService = new ItemService('./resources/data/items.json', LOG);
+const invoiceService = new InvoiceService('./resources/data/invoices.json', LOG);
+const invoiceLineService = new InvoiceLineService(LOG);
 
 /**
- * In order to work/ allow cookie sessions in Nginx or other web servers
+ * "trust proxy" - In order to work/ allow cookie sessions in Nginx or other web servers
  */
 app.set('trust proxy', 1);
 app.use(
@@ -34,8 +36,9 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.set('view engine', 'ejs');
 app.set('views', path.resolve('src/views'));
 app.use(express.static(path.resolve('./resources/statics')));
+app.set(LOG);
 /**
- * Load route definitions
+ * Load route definitions and pass any service you want which will be used
  */
 app.use(
   '/',
@@ -43,14 +46,19 @@ app.use(
     itemService,
     invoiceService,
     invoiceLineService,
+    LOG,
   })
 );
 /**
- * Unhandles error
+ * Unhandled errors
  */
 app.use((error, request, response, next) => {
   response.locals.message = error.message;
-  console.log(error.message); // log this error
+  LOG.error({
+    step: 'server js',
+    message: 'Uncaugth error',
+    error: error.message,
+  });
   const status = error.status || 500;
   response.locals.status = status;
   response.status(status);
@@ -62,10 +70,13 @@ app.use((error, request, response, next) => {
   });
 });
 /**
- * http://localhost:3000
+ * launch URL: http://localhost:3000
  */
 app.listen(port, () => {
-  console.log(
-    `express server is running! enter http://localhost:${port} address in your browser to load the app`
-  );
+  const logMessage = `express server is running! enter http://localhost:${port} address in your browser to load the app`;
+  LOG.info({
+    step: 'server js',
+    message: logMessage,
+  });
+  console.log(logMessage);
 });

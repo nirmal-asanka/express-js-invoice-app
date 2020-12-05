@@ -5,35 +5,17 @@
  */
 import express from 'express';
 import createError from 'http-errors';
-import { check, validationResult } from 'express-validator';
-
-const invoiceGeneratorValidations = [
-  check('finalInvoiceLinesJson')
-    .trim()
-    .isLength({ min: 3 })
-    .escape()
-    .withMessage('At least one invoice line is required'),
-];
-
-const invoiceLineAddValidations = [
-  check('item').trim().isLength({ min: 1 }).escape().withMessage('Please select an inventory item'),
-  check('quantity')
-    .trim()
-    .isNumeric()
-    .isLength({ min: 1 })
-    .escape()
-    .withMessage('Please add a quantity'),
-  check('description')
-    .trim()
-    .isLength({ min: 1 })
-    .escape()
-    .withMessage('Please write a description'),
-];
+import { validationResult } from 'express-validator';
+import validationRules from '../management/FormValidationRules';
 
 const routes = (routeParameters) => {
   const router = express.Router();
 
-  // Dashboard
+  /**
+   * @url /
+   * @method GET
+   * Dashboard or index
+   */
   router.get('/', (request, response, next) => {
     try {
       return response.render('layout', { pageTitle: 'Dashboard', pageName: 'index' });
@@ -42,7 +24,11 @@ const routes = (routeParameters) => {
     }
   });
 
-  // Retrieve list of invoices
+  /**
+   * @url /invoices
+   * @method GET
+   * Returned a list of invoices
+   */
   router.get('/invoices', async (request, response, next) => {
     try {
       const { invoiceService } = routeParameters;
@@ -57,7 +43,11 @@ const routes = (routeParameters) => {
     }
   });
 
-  // Retrieve a single invcoie
+  /**
+   * @url /invoices/<id>
+   * @method GET
+   * Returned single invoice
+   */
   router.get('/invoices:id', (request, response, next) => {
     try {
       return response.send('View single invcoie');
@@ -66,7 +56,11 @@ const routes = (routeParameters) => {
     }
   });
 
-  // Load the new invoice form
+  /**
+   * @url /invoice
+   * @method GET
+   * Load the form to generate a new invoice
+   */
   router.get('/invoice', async (request, response, next) => {
     try {
       const { itemService } = routeParameters;
@@ -99,28 +93,40 @@ const routes = (routeParameters) => {
     }
   });
 
-  // Submit invoice lines
-  router.post('/invoice-line', [invoiceLineAddValidations], async (request, response, next) => {
-    try {
-      const errors = validationResult(request);
-      if (!errors.isEmpty()) {
-        request.session.errors.invoiceLines = {
-          errors: errors.array(),
-        };
-      } else {
-        const { invoiceLineService } = routeParameters;
-        const updatedInvoiceLine = await invoiceLineService.addInvoiceLine(request.body);
-        if (updatedInvoiceLine) {
-          request.session.updatedInvoiceLine = updatedInvoiceLine;
+  /**
+   * @url /invoice-line (only form submission)
+   * @method POST
+   * Add a new record to the current invoice lines
+   */
+  router.post(
+    '/invoice-line',
+    [validationRules.invoiceLineAddValidations],
+    async (request, response, next) => {
+      try {
+        const errors = validationResult(request);
+        if (!errors.isEmpty()) {
+          request.session.errors.invoiceLines = {
+            errors: errors.array(),
+          };
+        } else {
+          const { invoiceLineService } = routeParameters;
+          const updatedInvoiceLine = await invoiceLineService.addInvoiceLine(request.body);
+          if (updatedInvoiceLine) {
+            request.session.updatedInvoiceLine = updatedInvoiceLine;
+          }
         }
+        return response.redirect('/invoice');
+      } catch (error) {
+        return next(error);
       }
-      return response.redirect('/invoice');
-    } catch (error) {
-      return next(error);
     }
-  });
+  );
 
-  // Remove a line from invoice
+  /**
+   * @url /invoice-line-delete/<id> (only form submission)
+   * @method GET
+   * Remove the selected record from the current invoice lines
+   */
   router.get('/invoice-line-delete/:id', async (request, response, next) => {
     try {
       if (request.params.id) {
@@ -142,25 +148,37 @@ const routes = (routeParameters) => {
     }
   });
 
-  // Submit the new invoice form
-  router.post('/invoice', [invoiceGeneratorValidations], (request, response, next) => {
-    try {
-      const errors = validationResult(request);
-      if (!errors.isEmpty()) {
-        request.session.errors.invoice = {
-          errors: errors.array(),
-        };
-        return response.redirect('/invoice');
+  /**
+   * @url /invoice (only form submission)
+   * @method POST
+   * This will generate a new invoice from the listed items and redirect to invoices page
+   */
+  router.post(
+    '/invoice',
+    [validationRules.invoiceGeneratorValidations],
+    (request, response, next) => {
+      try {
+        const errors = validationResult(request);
+        if (!errors.isEmpty()) {
+          request.session.errors.invoice = {
+            errors: errors.array(),
+          };
+          return response.redirect('/invoice');
+        }
+        // create a new invoice and clear the invoiceLines
+        request.session.updatedInvoiceLine = '';
+        return response.redirect('/invoices');
+      } catch (error) {
+        return next(error);
       }
-      // create a new invoice and clear the invoiceLines
-      request.session.updatedInvoiceLine = '';
-      return response.redirect('/invoices');
-    } catch (error) {
-      return next(error);
     }
-  });
+  );
 
-  // Load the merge invoice form
+  /**
+   * @url /merge-invoices
+   * @method GET
+   * Load the form to generate a new invoice by merging invoices
+   */
   router.get('/merge-invoices', (request, response, next) => {
     try {
       return response.render('layout', { pageTitle: 'Add invoice', pageName: 'invoice-merge' });
@@ -169,7 +187,11 @@ const routes = (routeParameters) => {
     }
   });
 
-  // Submit the merge invoice form
+  /**
+   * @url /merge-invoices (form submission)
+   * @method POST
+   * This will generate a new invoices with selected merge invoices
+   */
   router.post('/merge-invcoies', (request, response, next) => {
     try {
       return response.send('Submitted existing invoices to merge');
@@ -178,12 +200,28 @@ const routes = (routeParameters) => {
     }
   });
 
-  // Manipulated server error
+  /**
+   * @url /getError
+   * @method GET
+   * Manipulating an error for usage only
+   */
   router.get('/geterror', (request, response, next) => {
     return next(new Error('This is a server error'));
   });
 
+  /**
+   * @url /
+   * @method ALL
+   * This is the last route definition.
+   * If none of the above routes being matched, user may have entered a non existed url
+   */
   router.all('*', (request, response, next) => {
+    const { LOG } = routeParameters;
+
+    LOG.warn({
+      step: 'Routes middleware',
+      message: `Undefined path caugth. pathName - ${request.path}`,
+    });
     return next(createError(404, 'File not found'));
   });
 
