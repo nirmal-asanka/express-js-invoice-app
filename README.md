@@ -5,7 +5,7 @@ A simple invoicing MPA (Multi Page Application) using express js, boilerplate fo
 # prer-equisits
 
 1. node v14.15.0 (preferably install through nvm - node version manager https://github.com/nvm-sh/nvm)
-2. docker v~ for mongodb (not yes integrated)
+2. docker for mongodb (not yes integrated)
 
 # Setup
 

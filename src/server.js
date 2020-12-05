@@ -11,11 +11,13 @@ import InvoiceService from './services/InvoiceService';
 import GetErrorMessage from './services/ErrorService';
 import InvoiceLineService from './services/InvoiceLineService';
 import Log from './management/LogManagement';
+import MongodbService from './services/MongodbService';
 
 const app = express();
-const port = 3000;
+const port = process.env.SERVICE_PORT || 3000;
 const LOG = new Log();
-const itemService = new ItemService('./resources/data/items.json', LOG);
+const DB = new MongodbService(LOG);
+const itemService = new ItemService('./resources/data/items.json', LOG, DB);
 const invoiceService = new InvoiceService('./resources/data/invoices.json', LOG);
 const invoiceLineService = new InvoiceLineService(LOG);
 
@@ -37,6 +39,24 @@ app.set('view engine', 'ejs');
 app.set('views', path.resolve('src/views'));
 app.use(express.static(path.resolve('./resources/statics')));
 app.set(LOG);
+app.set(DB);
+
+/**
+ * Wait 3 seconds to finish mongo server to connect and populate mock data
+ */
+setTimeout(() => {
+  try {
+    DB.populateMockInventoryItems();
+    DB.populateMockInvoices();
+  } catch (error) {
+    LOG.warn({
+      step: 'server js - populate mock data',
+      message: 'An error occurred while populating mock data',
+      error: error.message,
+    });
+  }
+}, 3000);
+
 /**
  * Load route definitions and pass any service you want which will be used
  */

@@ -1,6 +1,6 @@
 import fs from 'fs';
 import util from 'util';
-import { find, propEq } from 'ramda';
+import { find, propEq, isEmpty, isNil } from 'ramda';
 
 const readFile = util.promisify(fs.readFile);
 
@@ -10,9 +10,10 @@ class ItemService {
    * @param datafile Path to a JSON file that contains the inventory item data
    * @param LOG Log class
    */
-  constructor(datafile, LOG) {
+  constructor(datafile, LOG, DB) {
     this.datafile = datafile;
     this.LOG = LOG;
+    this.DB = DB;
   }
 
   /**
@@ -74,12 +75,20 @@ class ItemService {
    */
   async getData() {
     try {
-      const data = await readFile(this.datafile, 'utf8');
+      let data;
+      data = await this.DB.dbFind('inventoryItems', {});
+      if (isEmpty(data) || isNil(data)) {
+        this.LOG.wran({
+          step: 'ItemService getData()',
+          message: 'Mongodb inventory items are empty - please check the mock data population',
+        });
+        data = JSON.parse(await readFile(this.datafile, 'utf8'));
+      }
       this.LOG.info({
         step: 'ItemService getData()',
         message: 'Inventory items returned successfully',
       });
-      return JSON.parse(data);
+      return data;
     } catch (error) {
       this.LOG.error({
         step: 'ItemService getData()',
