@@ -41,7 +41,10 @@ class MongodbService {
   async populateMockInventoryItems() {
     try {
       await this.dbDelete('inventoryItems', {});
-      await this.dbInsert(Constants.inventoryItems, 'inventoryItems');
+      await this.dbInsert(
+        Constants.MOCK_INVENTORY_ITEMS,
+        Constants.COLLECTION_NAME_INVENTORY_ITEMS
+      );
     } catch (error) {
       this.LOG.error({
         step: 'MongodbService populateMockInventoryItems()',
@@ -57,7 +60,7 @@ class MongodbService {
   async populateMockInvoices() {
     try {
       await this.dbDelete('invoices', {});
-      await this.dbInsert(Constants.invoices, 'invoices');
+      await this.dbInsert(Constants.MOCK_INVOICES, Constants.COLLECTION_NAME_INVOICES);
     } catch (error) {
       this.LOG.error({
         step: 'MongodbService populateMockInvoices()',

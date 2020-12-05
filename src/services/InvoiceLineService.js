@@ -7,20 +7,21 @@ class InvoiceLineService extends ItemService {
    * Constructor
    * @param LOG Log class
    */
-  constructor(LOG) {
+  constructor(LOG, DB) {
     super();
     this.LOG = LOG;
+    this.DB = DB;
   }
 
   /**
    * addInvoiceLine - push the selected inventory item into existing list
-   * @param {*} responseBody form data that contains selected inventory item details
+   * @param {*} payload form data that contains selected inventory item details
    * @return - new invoice lines stringified object
    */
-  async addInvoiceLine(responseBody) {
+  async addInvoiceLine(payload) {
     try {
-      const { item, quantity, description, temporaryInvoiceLinesJson } = responseBody;
-      const itemService = new ItemService('./resources/data/items.json', this.LOG);
+      const { item, quantity, description, temporaryInvoiceLinesJson } = payload;
+      const itemService = new ItemService(this.LOG, this.DB);
       const data = await itemService.getSingleItem(Number(item));
       const existingItems = temporaryInvoiceLinesJson ? JSON.parse(temporaryInvoiceLinesJson) : [];
       const newLineData = {

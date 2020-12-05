@@ -15,11 +15,17 @@ import MongodbService from './services/MongodbService';
 
 const app = express();
 const port = process.env.SERVICE_PORT || 3000;
+// const options = {
+//   LOG: new Log(),
+//   DB: new MongodbService(),
+// };
 const LOG = new Log();
 const DB = new MongodbService(LOG);
-const itemService = new ItemService('./resources/data/items.json', LOG, DB);
-const invoiceService = new InvoiceService('./resources/data/invoices.json', LOG);
-const invoiceLineService = new InvoiceLineService(LOG);
+// const itemService = new ItemService('./resources/data/items.json', LOG, DB);
+// const invoiceService = new InvoiceService('./resources/data/invoices.json', LOG);
+const itemService = new ItemService(LOG, DB);
+const invoiceService = new InvoiceService(LOG, DB);
+const invoiceLineService = new InvoiceLineService(LOG, DB);
 
 /**
  * "trust proxy" - In order to work/ allow cookie sessions in Nginx or other web servers
