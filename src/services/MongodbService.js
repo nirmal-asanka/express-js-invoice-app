@@ -74,19 +74,29 @@ class MongodbService {
    * @param {*} document - or the collection of data
    * @param {*} collectionName - or the document name
    */
-  async dbInsert(document, collectionName) {
+  async dbInsert(document, collectionName, insertOneItem = false) {
     try {
-      await this.DB.collection(collectionName).insertMany(document);
-      this.LOG.debug({
-        step: 'MongodbService dbInsert() insertMany',
-        message: `Successfully inserted ${collectionName} into mongodb`,
-      });
+      if (insertOneItem) {
+        await this.DB.collection(collectionName).insertOne(document);
+        this.LOG.debug({
+          step: 'MongodbService dbInsert() insertOne',
+          message: `Successfully inserted ${collectionName} into mongodb`,
+        });
+      } else {
+        await this.DB.collection(collectionName).insertMany(document);
+        this.LOG.debug({
+          step: 'MongodbService dbInsert() insertMany',
+          message: `Successfully inserted ${collectionName} into mongodb`,
+        });
+      }
+      return true;
     } catch (error) {
       this.LOG.error({
-        step: 'MongodbService dbInsert() insertMany',
+        step: 'MongodbService dbInsert()',
         message: `Error while inserting ${collectionName} into mongodb`,
         error: error.message,
       });
+      return false;
     }
   }
 

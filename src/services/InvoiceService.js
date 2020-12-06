@@ -1,5 +1,7 @@
 import moment from 'moment';
+import { v4 as uuidv4 } from 'uuid';
 import Constants from '../constants';
+import helpers from '../helpers';
 
 class InvoiceService {
   /**
@@ -23,16 +25,25 @@ class InvoiceService {
     try {
       const { finalInvoiceLinesJson } = payload;
       if (finalInvoiceLinesJson) {
-        const existingItems = finalInvoiceLinesJson ? JSON.parse(finalInvoiceLinesJson) : [];
-        console.log('existingItems --->>', existingItems);
-        // here --> calculate grand totals, retireve existing stored invoices, object assign and saveDB
-        return true;
+        const invoiceLines = finalInvoiceLinesJson ? JSON.parse(finalInvoiceLinesJson) : [];
+        if (invoiceLines.length > 0) {
+          const grandTotal = helpers.calculateGrandTotal(invoiceLines);
+          const organisedInvoiceLines = helpers.organiseInvoiceLines(invoiceLines);
+          const invoice = {
+            invoiceId: uuidv4(),
+            items: organisedInvoiceLines,
+            createdDate: moment().format(),
+            grandTotal,
+          };
+
+          return await this.DB.dbInsert(invoice, Constants.COLLECTION_NAME_INVOICES, true);
+        }
       }
       return false;
     } catch (error) {
       this.LOG.error({
         step: 'InvoiceService saveInvoice()',
-        message: 'Error while new invoice',
+        message: 'Error while saving a new invoice',
         error: error.message,
       });
       return null;

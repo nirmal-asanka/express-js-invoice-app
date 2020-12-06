@@ -16,7 +16,7 @@
           </tr>
         </thead>
         <tbody>
-          <% pageData.map((invoice) => { %>
+          <% if(pageData?.length > 0) { pageData.map((invoice) => { %>
           <tr>
             <td><%=invoice.invoiceId%></td>
             <td><%=invoice.createdDate%></td>
@@ -25,7 +25,13 @@
               <a href="/invoices/<%=invoice.invoiceId%>"><img src="images/globe2.png" /></a>
             </td>
           </tr>
-          <% }) %>
+          <% })} else { %>
+          <tr>
+            <td colspan="3">
+              <p class="is-italic is-size-7 has-text-centered">No invoices available</p>
+            </td>
+          </tr>
+          <% } %>
         </tbody>
       </table>
     </div>
