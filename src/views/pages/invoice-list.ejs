@@ -6,34 +6,139 @@
   </section>
   <section class="section">
     <div class="container">
-      <table class="table">
-        <thead>
-          <tr>
-            <th>Invoice Id</th>
-            <th>Created Date</th>
-            <th>Grand Total</th>
-            <th>View Invoice</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% if(pageData?.length > 0) { pageData.map((invoice) => { %>
-          <tr>
-            <td><%=invoice.invoiceId%></td>
-            <td><%=invoice.createdDate%></td>
-            <td>$<%=invoice.grandTotal%></td>
-            <td>
-              <a href="/invoices/<%=invoice.invoiceId%>"><img src="images/globe2.png" /></a>
-            </td>
-          </tr>
-          <% })} else { %>
-          <tr>
-            <td colspan="3">
-              <p class="is-italic is-size-7 has-text-centered">No invoices available</p>
-            </td>
-          </tr>
-          <% } %>
-        </tbody>
-      </table>
+      <div class="columns">
+        <div class="column is-half">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Invoice Id</th>
+                <th>Created Date</th>
+                <th>Grand Total</th>
+                <th>Details</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if(pageData?.invoices?.length > 0) { pageData.invoices.map((invoice) => { %>
+              <tr>
+                <td><%=invoice.invoiceId%></td>
+                <td><%=invoice.createdDate%></td>
+                <td>$<%=invoice.grandTotal%></td>
+                <td>
+                  <a href="/invoices/<%=invoice.invoiceId%>"><img src="images/globe2.png" /></a>
+                </td>
+              </tr>
+              <% })} else { %>
+              <tr>
+                <td colspan="3">
+                  <p class="is-italic is-size-7 has-text-centered">
+                    No invoices available. <a href="/invoice">Create an invoice</a>
+                  </p>
+                </td>
+              </tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+        <div class="column" style="background-color: #f5f5f5">
+          <p class="is-size-4 has-text-centered mb-5">Invoice details</p>
+          <% if(pageData?.invoiceDetails?.items?.length > 0) { %>
+          <div class="columns">
+            <div class="column is-full is-flex">
+              <p class="has-text-weight-semibold">Invoice ID: &nbsp;</p>
+              <p><%=pageData.invoiceDetails.invoiceId %></p>
+            </div>
+          </div>
+          <div class="columns">
+            <div class="column is-full is-flex">
+              <p class="has-text-weight-semibold">Grand Total: &nbsp;</p>
+              <p>$<%=pageData.invoiceDetails.grandTotal %></p>
+            </div>
+          </div>
+          <div class="columns">
+            <div class="column is-full is-flex">
+              <p class="has-text-weight-semibold">Created Date: &nbsp;</p>
+              <p><%=pageData.invoiceDetails.createdDate %></p>
+            </div>
+          </div>
+          <div class="columns">
+            <div class="column is-full">
+              <p class="has-text-weight-semibold mb-5">Invoice Lines:</p>
+              <% pageData.invoiceDetails.items.map((item) => { %>
+              <div class="m-3">
+                <div class="columns">
+                  <div class="column is-half is-flex">
+                    <p class="has-text-weight-semibold">Item Name: &nbsp;</p>
+                    <p><%=item.itemName %></p>
+                  </div>
+                  <div class="column is-half is-flex">
+                    <p class="has-text-weight-semibold">Quantity: &nbsp;</p>
+                    <p><%=item.quantity %></p>
+                  </div>
+                </div>
+                <div class="columns">
+                  <div class="column is-full is-flex">
+                    <p class="has-text-weight-semibold">Description: &nbsp;</p>
+                    <p><%=item.description %></p>
+                  </div>
+                </div>
+                <div class="columns">
+                  <div class="column is-one-third is-flex">
+                    <p class="has-text-weight-semibold">Unit: &nbsp;</p>
+                    <p><%=item.unit %></p>
+                  </div>
+                  <div class="column is-one-third is-flex">
+                    <p class="has-text-weight-semibold">Unit Price: &nbsp;</p>
+                    <p>$<%=item.unitPrice %></p>
+                  </div>
+                  <div class="column is-one-third is-flex">
+                    <p class="has-text-weight-semibold">Total Price: &nbsp;</p>
+                    <p>$<%=item.totalPrice %></p>
+                  </div>
+                </div>
+              </div>
+              <% }) %>
+            </div>
+          </div>
+          <%} else {%>
+          <p class="is-italic is-size-7 has-text-centered">
+            Please select an invoice from the table to view details
+          </p>
+          <%} %>
+        </div>
+      </div>
     </div>
   </section>
 </div>
+
+<!-- invoiceId: 'cec0103c-0d91-47d1-bfd8-48a55a4dfce9',
+  items: [
+    {
+      itemId: '3',
+      itemName: 'Fresh Produce Banana',
+      description: '3243',
+      unit: '1kg',
+      unitPrice: '5.00',
+      quantity: '1',
+      totalPrice: 5
+    },
+    {
+      itemId: '5',
+      itemName: 'Fresh Produce Kiwifruit',
+      description: 'asda',
+      unit: '1kg',
+      unitPrice: '9.70',
+      quantity: '2',
+      totalPrice: 19.4
+    },
+    {
+      itemId: '3',
+      itemName: 'Fresh Produce Banana',
+      description: 'sadas',
+      unit: '1kg',
+      unitPrice: '5.00',
+      quantity: '5',
+      totalPrice: 25
+    }
+  ],
+  createdDate: '2020-12-07T21:51:12+13:00',
+  grandTotal: '49.40' -->

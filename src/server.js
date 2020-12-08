@@ -12,6 +12,7 @@ import GetErrorMessage from './services/ErrorService';
 import InvoiceLineService from './services/InvoiceLineService';
 import Log from './management/LogManagement';
 import MongodbService from './services/MongodbService';
+import MockService from './services/MockService';
 
 const app = express();
 const port = process.env.SERVICE_PORT || 3000;
@@ -21,11 +22,10 @@ const port = process.env.SERVICE_PORT || 3000;
 // };
 const LOG = new Log();
 const DB = new MongodbService(LOG);
-// const itemService = new ItemService('./resources/data/items.json', LOG, DB);
-// const invoiceService = new InvoiceService('./resources/data/invoices.json', LOG);
 const itemService = new ItemService(LOG, DB);
 const invoiceService = new InvoiceService(LOG, DB);
 const invoiceLineService = new InvoiceLineService(LOG, DB);
+const mockService = new MockService(LOG, DB);
 
 /**
  * "trust proxy" - In order to work/ allow cookie sessions in Nginx or other web servers
@@ -52,8 +52,11 @@ app.set(DB);
  */
 setTimeout(() => {
   try {
-    DB.populateMockInventoryItems();
-    DB.populateMockInvoices();
+    /**
+     * This will overwrite your existing mongodb data for inventory items
+     */
+    mockService.populateMockInventoryItems();
+    mockService.populateMockInvoices();
   } catch (error) {
     LOG.warn({
       step: 'server js - populate mock data',

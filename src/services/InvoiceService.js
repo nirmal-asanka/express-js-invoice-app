@@ -15,6 +15,28 @@ class InvoiceService {
   }
 
   /**
+   * @param {*} invoiceId
+   * @return - object of the invoice
+   */
+  async getInvoice(invoiceId) {
+    this.LOG.info({
+      step: `InvoiceService getInvoice(). invoiceId: ${invoiceId}`,
+      message: 'Get invoice called',
+    });
+    try {
+      const data = await this.DB.dbFind(Constants.COLLECTION_NAME_INVOICES, { invoiceId });
+      return data[0];
+    } catch (error) {
+      this.LOG.error({
+        step: 'InvoiceService getInvoice()',
+        message: 'Error while the invoice by the invoiceId',
+        error: error.message,
+      });
+      return null;
+    }
+  }
+
+  /**
    * @param {*} payload object of the new invoice (list of stringified invoice lines)
    */
   async saveInvoice(payload) {
