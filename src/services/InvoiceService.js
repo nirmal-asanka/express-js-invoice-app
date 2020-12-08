@@ -1,17 +1,75 @@
-import fs from 'fs';
-import util from 'util';
 import moment from 'moment';
+import { v4 as uuidv4 } from 'uuid';
+import Constants from '../constants';
+import helpers from '../helpers';
 
-const readFile = util.promisify(fs.readFile);
 class InvoiceService {
   /**
    * Constructor
-   * @param {*} datafile Path to a JSON file that contains the invoice data
    * @param {*} LOG Log class
+   * @param {*} DB Mongodb class
    */
-  constructor(datafile, LOG) {
-    this.datafile = datafile;
+  constructor(LOG, DB) {
     this.LOG = LOG;
+    this.DB = DB;
+  }
+
+  /**
+   * @param {*} invoiceId
+   * @return - object of the invoice
+   */
+  async getInvoice(invoiceId) {
+    this.LOG.info({
+      step: `InvoiceService getInvoice(). invoiceId: ${invoiceId}`,
+      message: 'Get invoice called',
+    });
+    try {
+      const data = await this.DB.dbFind(Constants.COLLECTION_NAME_INVOICES, { invoiceId });
+      return data[0];
+    } catch (error) {
+      this.LOG.error({
+        step: 'InvoiceService getInvoice()',
+        message: 'Error while the invoice by the invoiceId',
+        error: error.message,
+      });
+      return null;
+    }
+  }
+
+  /**
+   * @param {*} payload object of the new invoice (list of stringified invoice lines)
+   */
+  async saveInvoice(payload) {
+    this.LOG.info({
+      step: 'InvoiceService saveInvoice()',
+      message: 'Save new invoice called',
+    });
+    try {
+      const { finalInvoiceLinesJson } = payload;
+      if (finalInvoiceLinesJson) {
+        const invoiceLines = finalInvoiceLinesJson ? JSON.parse(finalInvoiceLinesJson) : [];
+        if (invoiceLines.length > 0) {
+          const grandTotal = helpers.calculateGrandTotal(invoiceLines);
+          const organisedInvoiceLines = helpers.organiseInvoiceLines(invoiceLines);
+          const invoice = {
+            invoiceId: uuidv4(),
+            items: organisedInvoiceLines,
+            createdDate: moment().format(),
+            grandTotal,
+          };
+
+          return await this.DB.dbInsert(invoice, Constants.COLLECTION_NAME_INVOICES, true);
+        }
+      }
+      return false;
+    } catch (error) {
+      this.LOG.error({
+        step: 'InvoiceService saveInvoice()',
+        message: 'Error while saving a new invoice',
+        error: error.message,
+      });
+      return null;
+    }
   }
 
   /**
@@ -24,43 +82,28 @@ class InvoiceService {
       message: 'Get invoice list called',
     });
     try {
-      const data = await this.getData();
-      return data.map((invoiceItem) => {
-        return {
-          invoiceId: invoiceItem.invoiceId,
-          createdDate: moment(invoiceItem.createdDate).format('MMMM Do YYYY, h:mm:ss a'),
-          grandTotal: invoiceItem.grandTotal,
-        };
+      const data = await this.DB.dbFind(Constants.COLLECTION_NAME_INVOICES, {});
+      if (data) {
+        return data.map((invoiceItem) => {
+          return {
+            invoiceId: invoiceItem.invoiceId,
+            createdDate: moment(invoiceItem.createdDate).format('MMMM Do YYYY, h:mm:ss a'),
+            grandTotal: invoiceItem.grandTotal,
+          };
+        });
+      }
+      this.LOG.warn({
+        step: 'InvoiceService getList()',
+        message: 'Empty invoices object returned',
       });
+      return null;
     } catch (error) {
       this.LOG.error({
         step: 'InvoiceService getList()',
-        message: 'Error while formatting the invoice list',
+        message: 'Error while retrieving or formatting the invoice list',
         error: error.message,
       });
-      return false;
-    }
-  }
-
-  /**
-   * Fetches invoice data from the JSON file provided to the constructor
-   * @return - json parsed invoice list
-   */
-  async getData() {
-    try {
-      const data = await readFile(this.datafile, 'utf8');
-      this.LOG.info({
-        step: 'InvoiceService getData()',
-        message: 'Invoices returned successfully',
-      });
-      return JSON.parse(data);
-    } catch (error) {
-      this.LOG.error({
-        step: 'InvoiceService getData()',
-        message: 'Error while reading the json file',
-        error: error.message,
-      });
-      return false;
+      return null;
     }
   }
 }

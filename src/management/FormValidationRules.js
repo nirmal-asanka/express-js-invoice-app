@@ -8,7 +8,6 @@ const invoiceGeneratorValidations = [
   check('finalInvoiceLinesJson')
     .trim()
     .isLength({ min: 3 })
-    .escape()
     .withMessage('At least one invoice line is required'),
 ];
 

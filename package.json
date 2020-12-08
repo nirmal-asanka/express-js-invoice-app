@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "start": "node ./src/server.js",
-    "dev": "source ./scripts/set-env-debug.env && nodemon --experimental-specifier-resolution=node ./src/server.js",
+    "dev": "source ./scripts/env/set-env-debug.env && nodemon --experimental-specifier-resolution=node ./src/server.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint:fix": "npm run lint:js -- --fix"
   },
@@ -29,6 +29,7 @@
     "http-errors": "^1.8.0",
     "logger": "0.0.1",
     "moment": "^2.29.1",
+    "mongodb": "^3.6.3",
     "ramda": "^0.27.1",
     "save-dev": "0.0.1-security",
     "uuid": "^8.3.1"

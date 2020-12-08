@@ -5,7 +5,7 @@ A simple invoicing MPA (Multi Page Application) using express js, boilerplate fo
 # prer-equisits
 
 1. node v14.15.0 (preferably install through nvm - node version manager https://github.com/nvm-sh/nvm)
-2. docker v~ for mongodb (not yes integrated)
+2. docker for mongodb (not yes integrated)
 
 # Setup
 
@@ -30,13 +30,13 @@ npm run dev
 3. unit tests
 4. git push pre-hooks
 5. functionalities -
-   1. single invoice creation
+   1. Single invoice view details
    2. merge invoice creation
 
 # What's currently working
 
 1. You can get a simple idea of express js usage
-2. You can add invoice lines, delete invoice lines but cannot create the invoice yet
+2. You can add invoice lines, delete invoice lines and create an invoice.
 3. Loggers, Form validations, Error handlings are added
 
 # Lint
@@ -56,19 +56,22 @@ npm run test # run all unit tests
 
 ```
 logs/
+resources/
+    statics/
+        images/
+        css/
+scripts/
+    env/
 src/
+    constants/
+    helpers/
     management/
-    server.js
     routes/
     services/
     views/
         layout/
         pages/
-resources/
-    data/
-    statics/
-        images/
-        css/
+    server.js
 ```
 
 # Functional Overview

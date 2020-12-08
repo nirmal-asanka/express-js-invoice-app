@@ -32,11 +32,22 @@ const routes = (routeParameters) => {
   router.get('/invoices', async (request, response, next) => {
     try {
       const { invoiceService } = routeParameters;
-      const invoiceItems = await invoiceService.getList();
+      const invoices = await invoiceService.getList();
+      let invoiceDetails = [];
+      // check if there invoice details in the seession, and delete it after assinging to pageData object
+      if (request?.session?.invoices?.invoiceDetails) {
+        invoiceDetails = request.session.invoices.invoiceDetails;
+        request.session.invoices.invoiceDetails = null;
+      }
+      const pageData = {
+        invoices,
+        invoiceDetails,
+      };
+
       return response.render('layout', {
         pageTitle: 'All invoices',
         pageName: 'invoice-list',
-        pageData: invoiceItems,
+        pageData,
       });
     } catch (error) {
       return next(error);
@@ -48,9 +59,19 @@ const routes = (routeParameters) => {
    * @method GET
    * Returned single invoice
    */
-  router.get('/invoices:id', (request, response, next) => {
+  router.get('/invoices/:id', async (request, response, next) => {
     try {
-      return response.send('View single invcoie');
+      if (request.params.id) {
+        const invoiceId = request.params.id;
+        const { invoiceService } = routeParameters;
+        const invoiceDetails = await invoiceService.getInvoice(invoiceId);
+        if (invoiceDetails) {
+          request.session.invoices = {
+            invoiceDetails,
+          };
+        }
+      }
+      return response.redirect('/invoices');
     } catch (error) {
       return next(error);
     }
@@ -156,7 +177,7 @@ const routes = (routeParameters) => {
   router.post(
     '/invoice',
     [validationRules.invoiceGeneratorValidations],
-    (request, response, next) => {
+    async (request, response, next) => {
       try {
         const errors = validationResult(request);
         if (!errors.isEmpty()) {
@@ -165,9 +186,16 @@ const routes = (routeParameters) => {
           };
           return response.redirect('/invoice');
         }
-        // create a new invoice and clear the invoiceLines
-        request.session.updatedInvoiceLine = '';
-        return response.redirect('/invoices');
+        const { invoiceService } = routeParameters;
+        const updatedInvoiceLine = await invoiceService.saveInvoice(request.body);
+        if (updatedInvoiceLine) {
+          request.session.updatedInvoiceLine = '';
+          return response.redirect('/invoices');
+        }
+        request.session.errors.invoice = {
+          errors: ['An error occurred while saving the new invoice'],
+        };
+        return response.redirect('/invoice');
       } catch (error) {
         return next(error);
       }
