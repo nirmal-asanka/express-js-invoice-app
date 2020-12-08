@@ -7,16 +7,19 @@ import express from 'express';
 import createError from 'http-errors';
 import { validationResult } from 'express-validator';
 import validationRules from '../management/FormValidationRules';
+import Constants from '../constants';
 
 const routes = (routeParameters) => {
   const router = express.Router();
+
+  const { ROUTES } = Constants;
 
   /**
    * @url /
    * @method GET
    * Dashboard or index
    */
-  router.get('/', (request, response, next) => {
+  router.get(ROUTES.HOME, (request, response, next) => {
     try {
       return response.render('layout', { pageTitle: 'Dashboard', pageName: 'index' });
     } catch (error) {
@@ -29,7 +32,7 @@ const routes = (routeParameters) => {
    * @method GET
    * Returned a list of invoices
    */
-  router.get('/invoices', async (request, response, next) => {
+  router.get(ROUTES.INVOICES, async (request, response, next) => {
     try {
       const { invoiceService } = routeParameters;
       const invoices = await invoiceService.getList();
@@ -59,7 +62,7 @@ const routes = (routeParameters) => {
    * @method GET
    * Returned single invoice
    */
-  router.get('/invoices/:id', async (request, response, next) => {
+  router.get(ROUTES.VIEW_INVOICE, async (request, response, next) => {
     try {
       if (request.params.id) {
         const invoiceId = request.params.id;
@@ -82,7 +85,7 @@ const routes = (routeParameters) => {
    * @method GET
    * Load the form to generate a new invoice
    */
-  router.get('/invoice', async (request, response, next) => {
+  router.get(ROUTES.CREATE_INVOICE, async (request, response, next) => {
     try {
       const { itemService } = routeParameters;
       const inventoryItems = await itemService.getList();
@@ -120,7 +123,7 @@ const routes = (routeParameters) => {
    * Add a new record to the current invoice lines
    */
   router.post(
-    '/invoice-line',
+    ROUTES.ADD_INVOICE_LINE,
     [validationRules.invoiceLineAddValidations],
     async (request, response, next) => {
       try {
@@ -148,7 +151,7 @@ const routes = (routeParameters) => {
    * @method GET
    * Remove the selected record from the current invoice lines
    */
-  router.get('/invoice-line-delete/:id', async (request, response, next) => {
+  router.get(ROUTES.DELETE_INVOICE_LINE, async (request, response, next) => {
     try {
       if (request.params.id) {
         const itemId = request.params.id;
@@ -175,7 +178,7 @@ const routes = (routeParameters) => {
    * This will generate a new invoice from the listed items and redirect to invoices page
    */
   router.post(
-    '/invoice',
+    ROUTES.CREATE_INVOICE,
     [validationRules.invoiceGeneratorValidations],
     async (request, response, next) => {
       try {
@@ -207,9 +210,9 @@ const routes = (routeParameters) => {
    * @method GET
    * Load the form to generate a new invoice by merging invoices
    */
-  router.get('/merge-invoices', (request, response, next) => {
+  router.get(ROUTES.MERGE_INVOICES, (request, response, next) => {
     try {
-      return response.render('layout', { pageTitle: 'Add invoice', pageName: 'invoice-merge' });
+      return response.render('layout', { pageTitle: 'Merge invoices', pageName: 'invoice-merge' });
     } catch (error) {
       return next(error);
     }
@@ -220,7 +223,7 @@ const routes = (routeParameters) => {
    * @method POST
    * This will generate a new invoices with selected merge invoices
    */
-  router.post('/merge-invcoies', (request, response, next) => {
+  router.post(ROUTES.MERGE_INVOICES, (request, response, next) => {
     try {
       return response.send('Submitted existing invoices to merge');
     } catch (error) {
@@ -233,7 +236,7 @@ const routes = (routeParameters) => {
    * @method GET
    * Manipulating an error for usage only
    */
-  router.get('/geterror', (request, response, next) => {
+  router.get(ROUTES.MOCK_ERROR, (request, response, next) => {
     return next(new Error('This is a server error'));
   });
 
@@ -243,7 +246,7 @@ const routes = (routeParameters) => {
    * This is the last route definition.
    * If none of the above routes being matched, user may have entered a non existed url
    */
-  router.all('*', (request, response, next) => {
+  router.all(ROUTES.EVERYTHING_ELSE, (request, response, next) => {
     const { LOG } = routeParameters;
 
     LOG.warn({

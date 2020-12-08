@@ -4,7 +4,7 @@
  */
 import MOCK_INVENTORY_ITEMS from './mockInventoryItems';
 import MOCK_INVOICES from './mockInvoices';
-
+import ROUTES from './routes';
 /**
  * List down all your mongodb collection names.
  * This is the single place to change the collection names when required.
@@ -20,4 +20,5 @@ export default {
   MOCK_INVOICES,
   COLLECTION_NAME_INVENTORY_ITEMS,
   COLLECTION_NAME_INVOICES,
+  ROUTES,
 };
