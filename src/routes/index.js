@@ -74,7 +74,7 @@ const routes = (routeParameters) => {
           };
         }
       }
-      return response.redirect('/invoices');
+      return response.redirect(ROUTES.INVOICES);
     } catch (error) {
       return next(error);
     }
@@ -139,7 +139,7 @@ const routes = (routeParameters) => {
             request.session.updatedInvoiceLine = updatedInvoiceLine;
           }
         }
-        return response.redirect('/invoice');
+        return response.redirect(ROUTES.CREATE_INVOICE);
       } catch (error) {
         return next(error);
       }
@@ -166,7 +166,7 @@ const routes = (routeParameters) => {
           request.session.updatedInvoiceLine = updatedInvoiceLine;
         }
       }
-      return response.redirect('/invoice');
+      return response.redirect(ROUTES.CREATE_INVOICE);
     } catch (error) {
       return next(error);
     }
@@ -187,18 +187,18 @@ const routes = (routeParameters) => {
           request.session.errors.invoice = {
             errors: errors.array(),
           };
-          return response.redirect('/invoice');
+          return response.redirect(ROUTES.CREATE_INVOICE);
         }
         const { invoiceService } = routeParameters;
         const updatedInvoiceLine = await invoiceService.saveInvoice(request.body);
         if (updatedInvoiceLine) {
           request.session.updatedInvoiceLine = '';
-          return response.redirect('/invoices');
+          return response.redirect(ROUTES.INVOICES);
         }
         request.session.errors.invoice = {
           errors: ['An error occurred while saving the new invoice'],
         };
-        return response.redirect('/invoice');
+        return response.redirect(ROUTES.CREATE_INVOICE);
       } catch (error) {
         return next(error);
       }
@@ -210,13 +210,52 @@ const routes = (routeParameters) => {
    * @method GET
    * Load the form to generate a new invoice by merging invoices
    */
-  router.get(ROUTES.MERGE_INVOICES, (request, response, next) => {
+  router.get(ROUTES.MERGE_INVOICES, async (request, response, next) => {
     try {
-      return response.render('layout', { pageTitle: 'Merge invoices', pageName: 'invoice-merge' });
+      const { invoiceService } = routeParameters;
+      const invoices = await invoiceService.getList();
+      let errors = '';
+      errors = {
+        invoiceMergeView: request?.session?.errors?.merge_invoice_view?.errors,
+      };
+      if (errors) {
+        request.session.errors = {};
+      }
+      return response.render('layout', {
+        pageTitle: 'Merge invoices',
+        pageName: 'invoice-merge',
+        pageData: {
+          invoices,
+        },
+        pageErrors: errors,
+      });
     } catch (error) {
       return next(error);
     }
   });
+
+  /**
+   * @url /merge-invoices-view
+   * @method POST
+   * Load the details of the invoices
+   */
+  router.post(
+    ROUTES.MERGE_INVOICES_VIEW,
+    [validationRules.invoiceMergeViewValidations],
+    async (request, response, next) => {
+      try {
+        const errors = validationResult(request);
+        if (!errors.isEmpty()) {
+          request.session.errors.merge_invoice_view = {
+            errors: errors.array(),
+          };
+        }
+        return response.redirect(ROUTES.MERGE_INVOICES);
+      } catch (error) {
+        return next(error);
+      }
+    }
+  );
 
   /**
    * @url /merge-invoices (form submission)

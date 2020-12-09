@@ -26,6 +26,19 @@ const invoiceLineAddValidations = [
     .withMessage('Please write a description'),
 ];
 
+const invoiceMergeViewValidations = [
+  check('first-invoice')
+    .trim()
+    .isLength({ min: 1 })
+    .escape()
+    .withMessage('Please select the first invoice'),
+  check('second-invoice')
+    .trim()
+    .isLength({ min: 1 })
+    .escape()
+    .withMessage('Please select the second invoice'),
+];
+
 /**
  * Once you defined your validation rules, please export here,
  * You can use in routes/index.js file
@@ -34,4 +47,5 @@ const invoiceLineAddValidations = [
 export default {
   invoiceGeneratorValidations,
   invoiceLineAddValidations,
+  invoiceMergeViewValidations,
 };
