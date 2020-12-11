@@ -30,14 +30,15 @@ npm run dev
 1. linting script to fix errors
 2. unit tests
 3. git push pre-hooks
-4. functionalities -
-   1. merge invoice creation
 
 # What's currently working
 
 1. You can get a simple idea of express js usage
-2. You can add invoice lines, delete invoice lines and create an invoice finally view created invoices.
-3. Loggers, Form validations, Error handlings are added
+2. View lint and individual invoices
+3. Add/ Remove invoice lines.
+4. Generate invoices from invoice lines.
+5. Merge two invoices and generate a new invoice.
+6. Loggers, Form validations, Error handlings are added
 
 # Lint
 
