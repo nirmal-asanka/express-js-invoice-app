@@ -25,7 +25,12 @@ class InvoiceService {
     });
     try {
       const data = await this.DB.dbFind(Constants.COLLECTION_NAME_INVOICES, { invoiceId });
-      return data[0];
+      return {
+        invoiceId: data[0].invoiceId,
+        items: data[0].items,
+        createdDate: data[0].createdData,
+        grandTotal: data[0].grandTotal,
+      };
     } catch (error) {
       this.LOG.error({
         step: 'InvoiceService getInvoice()',

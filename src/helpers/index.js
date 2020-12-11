@@ -20,7 +20,7 @@ const organiseInvoiceLines = (invoiceLines) => {
       itemName: line.itemName,
       description: line.description,
       unit: line.unit,
-      unitPrice: line.unitPrice.toFixed(2),
+      unitPrice: Number(line.unitPrice).toFixed(2),
       quantity: line.quantity,
       totalPrice: line.totalPrice,
     };

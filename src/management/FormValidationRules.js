@@ -27,12 +27,12 @@ const invoiceLineAddValidations = [
 ];
 
 const invoiceMergeViewValidations = [
-  check('first-invoice')
+  check('firstInvoiceID')
     .trim()
     .isLength({ min: 1 })
     .escape()
     .withMessage('Please select the first invoice'),
-  check('second-invoice')
+  check('secondInvoiceID')
     .trim()
     .isLength({ min: 1 })
     .escape()

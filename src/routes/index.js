@@ -215,17 +215,24 @@ const routes = (routeParameters) => {
       const { invoiceService } = routeParameters;
       const invoices = await invoiceService.getList();
       let errors = '';
+      let newMergedInvoiceLines = null;
       errors = {
         invoiceMergeView: request?.session?.errors?.merge_invoice_view?.errors,
       };
       if (errors) {
         request.session.errors = {};
       }
+
+      if (request?.session?.newMergedInvoiceLines) {
+        newMergedInvoiceLines = request.session.newMergedInvoiceLines;
+        request.session.newMergedInvoiceLines = null;
+      }
       return response.render('layout', {
         pageTitle: 'Merge invoices',
         pageName: 'invoice-merge',
         pageData: {
           invoices,
+          newMergedInvoiceLines,
         },
         pageErrors: errors,
       });
@@ -249,6 +256,18 @@ const routes = (routeParameters) => {
           request.session.errors.merge_invoice_view = {
             errors: errors.array(),
           };
+        } else {
+          const { invoiceMergeService } = routeParameters;
+          const newMergedInvoiceLines = await invoiceMergeService.createMergeInvoicePayload(
+            request.body
+          );
+          if (newMergedInvoiceLines) {
+            request.session.newMergedInvoiceLines = newMergedInvoiceLines;
+          } else {
+            request.session.errors.merge_invoice_view = {
+              errors: ['An error occurred while merging two payloads'],
+            };
+          }
         }
         return response.redirect(ROUTES.MERGE_INVOICES);
       } catch (error) {
@@ -262,13 +281,26 @@ const routes = (routeParameters) => {
    * @method POST
    * This will generate a new invoices with selected merge invoices
    */
-  router.post(ROUTES.MERGE_INVOICES, (request, response, next) => {
-    try {
-      return response.send('Submitted existing invoices to merge');
-    } catch (error) {
-      return next(error);
+  router.post(
+    ROUTES.MERGE_INVOICES,
+    [validationRules.invoiceGeneratorValidations],
+    async (request, response, next) => {
+      try {
+        const { invoiceService } = routeParameters;
+        const updatedInvoiceLine = await invoiceService.saveInvoice(request.body);
+        if (updatedInvoiceLine) {
+          request.session.updatedInvoiceLine = '';
+          return response.redirect(ROUTES.INVOICES);
+        }
+        request.session.errors.merge_invoice_view = {
+          errors: ['An error occurred while saving the new invoice'],
+        };
+        return response.redirect(ROUTES.MERGE_INVOICES);
+      } catch (error) {
+        return next(error);
+      }
     }
-  });
+  );
 
   /**
    * @url /getError

@@ -10,6 +10,7 @@ import ItemService from './services/ItemService';
 import InvoiceService from './services/InvoiceService';
 import GetErrorMessage from './services/ErrorService';
 import InvoiceLineService from './services/InvoiceLineService';
+import InvoiceMergeService from './services/InvoiceMergeService';
 import Log from './management/LogManagement';
 import MongodbService from './services/MongodbService';
 import MockService from './services/MockService';
@@ -25,6 +26,7 @@ const DB = new MongodbService(LOG);
 const itemService = new ItemService(LOG, DB);
 const invoiceService = new InvoiceService(LOG, DB);
 const invoiceLineService = new InvoiceLineService(LOG, DB);
+const invoiceMergeService = new InvoiceMergeService(LOG, DB);
 const mockService = new MockService(LOG, DB);
 
 /**
@@ -75,6 +77,7 @@ app.use(
     itemService,
     invoiceService,
     invoiceLineService,
+    invoiceMergeService,
     LOG,
   })
 );

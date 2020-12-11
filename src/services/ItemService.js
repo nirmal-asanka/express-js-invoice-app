@@ -49,7 +49,7 @@ class ItemService {
           return {
             itemId: inventoryItem.itemId,
             name: inventoryItem.name,
-            unitPrice: inventoryItem.unitPrice,
+            unitPrice: Number(inventoryItem.unitPrice),
             unit: inventoryItem.unit,
           };
         });

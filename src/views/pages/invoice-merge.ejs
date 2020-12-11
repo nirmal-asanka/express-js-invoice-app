@@ -10,10 +10,10 @@
         <div class="column is-half">
           <form id="form-merge-invoice-select" action="/merge-invoices-view" method="POST">
             <div class="field">
-              <label class="label" for="item">Select first invoice</label>
+              <label class="label" for="firstInvoiceID">Select first invoice</label>
               <div class="control">
                 <div class="select is-rounded">
-                  <select name="first-invoice">
+                  <select name="firstInvoiceID">
                     <option value="">Select dropdown</option>
                     <% pageData.invoices.map((invoice) => { %>
                     <option value="<%=invoice.invoiceId%>">
@@ -25,10 +25,10 @@
               </div>
             </div>
             <div class="field">
-              <label class="label" for="item">Select second invoice</label>
+              <label class="label" for="secondInvoiceID">Select second invoice</label>
               <div class="control">
                 <div class="select is-rounded">
-                  <select name="second-invoice">
+                  <select name="secondInvoiceID">
                     <option value="">Select dropdown</option>
                     <% pageData.invoices.map((invoice) => { %>
                     <option value="<%=invoice.invoiceId%>">
@@ -58,7 +58,72 @@
             </div>
           </form>
         </div>
-        <div class="column">select second invoice</div>
+        <div class="column" style="background-color: #f5f5f5">
+          <p class="is-size-4 has-text-centered mb-5">Merged invoice lines</p>
+          <% if(pageData?.newMergedInvoiceLines?.length > 0) { %> <%
+          pageData.newMergedInvoiceLines.map((item) => { %>
+          <div class="m-3">
+            <div class="columns">
+              <div class="column is-half is-flex">
+                <p class="has-text-weight-semibold">Item Name: &nbsp;</p>
+                <p><%=item.itemName %></p>
+              </div>
+              <div class="column is-half is-flex">
+                <p class="has-text-weight-semibold">Quantity: &nbsp;</p>
+                <p><%=item.quantity %></p>
+              </div>
+            </div>
+            <div class="columns">
+              <div class="column is-full is-flex">
+                <p class="has-text-weight-semibold">Description: &nbsp;</p>
+                <p><%=item.description %></p>
+              </div>
+            </div>
+            <div class="columns">
+              <div class="column is-one-third is-flex">
+                <p class="has-text-weight-semibold">Unit: &nbsp;</p>
+                <p><%=item.unit %></p>
+              </div>
+              <div class="column is-one-third is-flex">
+                <p class="has-text-weight-semibold">Unit Price: &nbsp;</p>
+                <p>$<%=item.unitPrice %></p>
+              </div>
+              <div class="column is-one-third is-flex">
+                <p class="has-text-weight-semibold">Total Price: &nbsp;</p>
+                <p>$<%=item.totalPrice %></p>
+              </div>
+            </div>
+          </div>
+          <% }) %>
+          <form id="form-merge-invoice-confirm" action="/merge-invoices" method="POST">
+            <div class="field">
+              <div class="control">
+                <input
+                  type="hidden"
+                  name="finalInvoiceLinesJson"
+                  value="<%=JSON.stringify(pageData.newMergedInvoiceLines)%>"
+                />
+              </div>
+            </div>
+            <div class="field mt-5">
+              <div class="control">
+                <button
+                  class="button is-primary is-rounded"
+                  id="btn-merge-invoice-confirm"
+                  type="submit"
+                >
+                  Confirm merge
+                </button>
+              </div>
+            </div>
+          </form>
+          <%} else {%>
+          <p class="is-italic is-size-7 has-text-centered">
+            Please choose two invoices from the form and click select invoice button to generate new
+            merged invoice lines
+          </p>
+          <%} %>
+        </div>
       </div>
     </div>
   </section>
